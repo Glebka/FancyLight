@@ -2377,6 +2377,10 @@
     (uuid fff5a89a-2bc2-4082-bd29-816492b96d34)
   )
 
+  (text "REMAP PWM PINs!!!!" (at 145.415 92.075 0)
+    (effects (font (size 2 2) (color 255 19 36 1)) (justify left bottom))
+    (uuid 48d6cb12-d58d-4f4a-b151-0e786ceeefcf)
+  )
   (text "400 mA\n" (at 24.765 121.285 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 97146ab6-e4df-473c-8f15-6d66914f3cc3)
@@ -2867,7 +2871,7 @@
   )
 
   (symbol (lib_id "LQH32MN2R2K23L:LQH32MN2R2K23L") (at 52.07 155.575 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
+    (in_bom no) (on_board yes) (dnp yes) (fields_autoplaced)
     (uuid 1cef2ba8-3413-4cc7-8007-289f0578f20c)
     (property "Reference" "L1" (at 52.07 149.86 0)
       (effects (font (size 1.27 1.27)))
@@ -3350,7 +3354,7 @@
   )
 
   (symbol (lib_id "rf:syn480r") (at 269.875 142.24 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp yes) (fields_autoplaced)
+    (in_bom no) (on_board yes) (dnp yes) (fields_autoplaced)
     (uuid 5ef8f53e-73a6-4baf-ada5-8c2f4fb1df0e)
     (property "Reference" "U5" (at 270.51 132.08 0)
       (effects (font (size 1.27 1.27)))
@@ -3562,7 +3566,7 @@
   )
 
   (symbol (lib_id "kicad_lceda:TYPE-C_6P") (at 30.48 61.595 0) (mirror y) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
+    (in_bom no) (on_board yes) (dnp yes)
     (uuid 795a7037-af88-4a9e-8357-0bfd38fc90d7)
     (property "Reference" "USB1" (at 27.94 50.165 0)
       (effects (font (size 1.27 1.27)))
@@ -4024,7 +4028,7 @@
   )
 
   (symbol (lib_id "Connector:Conn_01x03_Pin") (at 202.565 19.685 90) (mirror x) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no)
+    (in_bom no) (on_board yes) (dnp yes)
     (uuid b41d5e2d-9996-4f43-8ea5-6c083d01c460)
     (property "Reference" "J2" (at 202.565 15.24 90)
       (effects (font (size 1.27 1.27)))
@@ -4230,7 +4234,7 @@
   )
 
   (symbol (lib_id "Device:R_Photo") (at 270.51 48.895 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
+    (in_bom no) (on_board yes) (dnp yes) (fields_autoplaced)
     (uuid d20859eb-bd6c-4b7e-8e44-33bd5359065c)
     (property "Reference" "R15" (at 273.05 48.26 0)
       (effects (font (size 1.27 1.27)) (justify left))
@@ -4679,7 +4683,7 @@
   )
 
   (symbol (lib_id "Connector_Generic:Conn_02x03_Odd_Even") (at 151.13 177.546 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
+    (in_bom no) (on_board yes) (dnp yes) (fields_autoplaced)
     (uuid ef976752-cc17-40f8-acd1-82c830157182)
     (property "Reference" "J2" (at 152.4 169.926 0)
       (effects (font (size 1.27 1.27)))
@@ -4812,7 +4816,7 @@
   )
 
   (symbol (lib_id "Connector_Generic:Conn_02x02_Odd_Even") (at 273.05 111.76 0) (unit 1)
-    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
+    (in_bom no) (on_board yes) (dnp yes) (fields_autoplaced)
     (uuid faaf6384-7d94-4f5b-bed7-4e1c566c67bc)
     (property "Reference" "J3" (at 274.32 106.045 0)
       (effects (font (size 1.27 1.27)))

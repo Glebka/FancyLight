@@ -1,0 +1,4 @@
+Designator,Val,Package,Mid X,Mid Y,Rotation,Layer
+"C1","5-10pF","C_0603_1608Metric",3.950000,-8.350000,90.000000,top
+"C2","0.1u","C_0603_1608Metric",10.050000,-8.950000,-90.000000,top
+"U1","TTP223-BA6","SOT-23-6",6.984900,-8.116000,0.000000,top

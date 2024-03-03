@@ -1,0 +1,23 @@
+G04 #@! TF.GenerationSoftware,KiCad,Pcbnew,(7.0.0)*
+G04 #@! TF.CreationDate,2024-02-11T00:03:20+02:00*
+G04 #@! TF.ProjectId,cap-touch-sensor,6361702d-746f-4756-9368-2d73656e736f,rev?*
+G04 #@! TF.SameCoordinates,Original*
+G04 #@! TF.FileFunction,Soldermask,Bot*
+G04 #@! TF.FilePolarity,Negative*
+%FSLAX46Y46*%
+G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
+G04 Created by KiCad (PCBNEW (7.0.0)) date 2024-02-11 00:03:20*
+%MOMM*%
+%LPD*%
+G01*
+G04 APERTURE LIST*
+%ADD10R,1.000000X1.000000*%
+%ADD11C,10.000000*%
+G04 APERTURE END LIST*
+D10*
+X7499999Y-1199999D03*
+X2999999Y-3599999D03*
+X11999999Y-3599999D03*
+D11*
+X7500000Y-7500000D03*
+M02*

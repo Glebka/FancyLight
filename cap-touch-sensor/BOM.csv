@@ -1,0 +1,4 @@
+Comment,Designator,Footprint,LCSC
+"5-10pF","C1","Capacitor_SMD:C_0603_1608Metric","C37474"
+"0.1u","C2","Capacitor_SMD:C_0603_1608Metric","C14663"
+"TTP223-BA6","U1","Package_TO_SOT_SMD:SOT-23-6","C1693666"
