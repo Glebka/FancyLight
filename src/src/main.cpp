@@ -1,5 +1,6 @@
 #include <avr/power.h>
 #include <avr/sleep.h>
+#include <avr/wdt.h>
 #include <Arduino.h>
 #include <EEPROM.h>
 
@@ -9,18 +10,27 @@
 #define PWM_PIN 8
 #define TRIGGER_PIN 9
 
-enum State {
+enum State
+{
   OFF,
   ON,
   ON_HOLDING,
 };
 
+enum ButtonState
+{
+  RELEASED,
+  PRESSED,
+  LONG_PRESSED,
+};
+
 // Soft PWM setup
-volatile uint8_t intensity = 10;
-volatile int8_t direction = 1;
+volatile uint8_t intensity = 255;
+volatile int8_t direction = -1;
 volatile uint8_t state = 0;
 volatile unsigned long btn_press = 0;
 volatile unsigned long btn_release = 0;
+volatile ButtonState btn_state = RELEASED;
 
 void power_down()
 {
@@ -42,7 +52,8 @@ void idle()
   sleep_cpu();
 }
 
-void setup() {
+void setup()
+{
   cli();
 
   // disable ADC
@@ -55,7 +66,6 @@ void setup() {
   power_timer0_enable();
   power_timer1_enable();
 
-
   pinMode(LED_PIN, OUTPUT);
   pinMode(DCDC_EN_PIN, OUTPUT);
   pinMode(SENSE_PIN, INPUT);
@@ -63,11 +73,10 @@ void setup() {
 
   // Soft PWM setup
   pinMode(PWM_PIN, OUTPUT);
-  TIFR1 = (1 << TOV1);  // clear interrupt flag
+  TIFR1 = (1 << TOV1);    // clear interrupt flag
   TIMSK1 = (1 << OCIE1A); // enable output compare match interrupt
-  OCR1A = 0x00FF; // set TOP to 255
-  TCCR1B = (1 << CS10);  // start timer, no pre-scaler
-
+  OCR1A = 0x00FF;         // set TOP to 255
+  TCCR1B = (1 << CS10);   // start timer, no pre-scaler
 
   // Interrupts setup
   GIMSK = (1 << PCIE0);
@@ -78,47 +87,92 @@ void setup() {
   digitalWrite(PWM_PIN, LOW);
 
   sei();
+  wdt_enable(WDTO_1S);
   delay(5);
   power_down();
 }
 
-void loop() {
-  if (btn_press && !btn_release && state == OFF) {
+void handle_button_state()
+{
+  if (btn_state == PRESSED && state == OFF)
+  {
     state = ON_HOLDING;
     digitalWrite(DCDC_EN_PIN, HIGH);
   }
-  if (btn_press && !btn_release && (millis() - btn_press) > 500) {
-    if (intensity + direction >= 255) {
+  if (btn_state == PRESSED && (millis() - btn_press) > 500)
+  {
+    btn_state = LONG_PRESSED;
+  }
+  if (btn_state == LONG_PRESSED)
+  {
+    cli();
+    if (direction > 0)
+    {
+      intensity = min(intensity + direction, 255);
+    }
+    if (direction < 0)
+    {
+      intensity = max(intensity + direction, 1);
+    }
+    if (direction > 0 && intensity == 255)
+    {
       direction = -1;
+      btn_press = 0;
+      btn_release = 0;
+      btn_state = RELEASED;
     }
-    if (intensity + direction <= 1 ) {
+    if (direction < 0 && intensity == 1)
+    {
       direction = 1;
+      btn_press = 0;
+      btn_release = 0;
+      btn_state = RELEASED;
     }
-    intensity += direction;
+    sei();
     delay(10);
   }
-  if (btn_press && btn_release && (btn_release - btn_press) < 500 && state != ON_HOLDING) {
+  if (btn_press && btn_release && (btn_release - btn_press) < 500 && state != ON_HOLDING)
+  {
+    cli();
     btn_press = 0;
     btn_release = 0;
     state = OFF;
     digitalWrite(PWM_PIN, LOW);
     digitalWrite(DCDC_EN_PIN, LOW);
+    sei();
     power_down();
   }
-  if (btn_press && btn_release && (state == ON_HOLDING || state == ON)) {
+  if (btn_press && btn_release && (state == ON_HOLDING || state == ON))
+  {
+    cli();
     btn_press = 0;
     btn_release = 0;
     state = ON;
+    sei();
     idle();
   }
 }
 
+void loop()
+{
+  handle_button_state();
+}
+
 ISR(PCINT0_vect)
 {
-  if (digitalRead(TRIGGER_PIN) == HIGH) {
+  if (digitalRead(TRIGGER_PIN) == HIGH)
+  {
     btn_press = millis();
-  } else {
-    btn_release = millis();
+    btn_release = 0;
+    btn_state = PRESSED;
+  }
+  else
+  {
+    if (btn_press)
+    {
+      btn_release = millis();
+      btn_state = RELEASED;
+    }
   }
 }
 
@@ -126,15 +180,23 @@ ISR(PCINT0_vect)
 ISR(TIMER1_COMPA_vect)
 {
   static uint8_t softcount = 0xFF;
-  if (state == OFF) {
+  if (state == OFF)
+  {
     return;
   }
   softcount++;
-  if (softcount == 0) {
+  if (softcount == 0)
+  {
     digitalWrite(PWM_PIN, HIGH);
   }
-  if (softcount == intensity) {
+  if (softcount == intensity)
+  {
     digitalWrite(PWM_PIN, LOW);
   }
   TCNT1 = 0;
+}
+
+ISR(WDT_vect)
+{
+  digitalWrite(LED_PIN, !digitalRead(LED_PIN));
 }
