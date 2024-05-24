@@ -2,55 +2,9 @@
 #include <avr/sleep.h>
 #include <avr/wdt.h>
 #include <Arduino.h>
-#include <EEPROM.h>
 
-#define LED_PIN 6
-#define SENSE_PIN 1
-#define DCDC_EN_PIN 10
-#define PWM_PIN 8
-#define TRIGGER_PIN 9
-
-enum State
-{
-  OFF,
-  ON,
-  ON_HOLDING,
-};
-
-enum ButtonState
-{
-  RELEASED,
-  PRESSED,
-  LONG_PRESSED,
-};
-
-// Soft PWM setup
-volatile uint8_t intensity = 255;
-volatile int8_t direction = -1;
-volatile uint8_t state = 0;
-volatile unsigned long btn_press = 0;
-volatile unsigned long btn_release = 0;
-volatile ButtonState btn_state = RELEASED;
-
-void power_down()
-{
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-  cli();
-  sleep_enable();
-  sleep_bod_disable();
-  sei();
-  sleep_cpu();
-}
-
-void idle()
-{
-  set_sleep_mode(SLEEP_MODE_IDLE);
-  cli();
-  sleep_enable();
-  sleep_bod_disable();
-  sei();
-  sleep_cpu();
-}
+#include "api.hpp"
+#include "fsm.hpp"
 
 void setup()
 {
@@ -85,93 +39,94 @@ void setup()
   digitalWrite(DCDC_EN_PIN, LOW);
   digitalWrite(LED_PIN, LOW);
   digitalWrite(PWM_PIN, LOW);
-
   sei();
-  wdt_enable(WDTO_1S);
   delay(5);
-  power_down();
+  powerDown();
 }
 
-void handle_button_state()
-{
-  if (btn_state == PRESSED && state == OFF)
-  {
-    state = ON_HOLDING;
-    digitalWrite(DCDC_EN_PIN, HIGH);
-  }
-  if (btn_state == PRESSED && (millis() - btn_press) > 500)
-  {
-    btn_state = LONG_PRESSED;
-  }
-  if (btn_state == LONG_PRESSED)
-  {
-    cli();
-    if (direction > 0)
-    {
-      intensity = min(intensity + direction, 255);
+void handleEvent(event::Event event) {
+    switch (fsm::currentState) {
+        case fsm::OFF:
+            if (event == event::BTN_PRESS) {
+                turnOn();
+                fsm::currentState = fsm::PRE_ON1;
+            } else if (event == event::MAINS_OFF && true /* condition */) {
+                turnOn();
+                fsm::currentState = fsm::ON;
+            }
+            break;
+
+        case fsm::PRE_ON1:
+            if (event == event::BTN_LONG_PRESS) {
+                brightness_control::startAdjust();
+                fsm::currentState = fsm::BRIGHTNESS_ADJUSTMENT;
+            } else if (event == event::BTN_RELEASE) {
+                if (touch_control::isShortPress()) {
+                    fsm::currentState = fsm::ON;
+                }
+            }
+            break;
+        case fsm::BRIGHTNESS_ADJUSTMENT:
+            if (event == event::BTN_RELEASE) {
+                brightness_control::stopAdjust();
+                fsm::currentState = fsm::ON;
+            } else if (event == event::BRIGHTNESS_LIMIT_REACHED) {
+                brightness_control::stopAdjust();
+                brightness_control::switchAdjustmentDirection();
+                fsm::currentState = fsm::BRIGHTNESS_LIMIT;
+            }
+            break;
+        case fsm::BRIGHTNESS_LIMIT:
+            if (event == event::BTN_RELEASE) {
+                fsm::currentState = fsm::ON;
+            }
+            break;
+        case fsm::ON:
+            if (event == event::BTN_PRESS) {
+                fsm::currentState = fsm::PRE_OFF1;
+            } else if (event == event::HIGH_ILLUMINATION && true /* condition */) {
+                turnOff();
+                fsm::currentState = fsm::OFF;
+            }
+            break;
+        case fsm::PRE_OFF1:
+            if (event == event::BTN_RELEASE) {
+                // Check if the button release was less than 500 ms
+                if (touch_control::isShortPress()) {
+                    turnOff();
+                    fsm::currentState = fsm::OFF;
+                }
+            } else if (event == event::BTN_LONG_PRESS) {
+                brightness_control::startAdjust();
+                fsm::currentState = fsm::BRIGHTNESS_ADJUSTMENT;
+            }
+            break;
+        default:
+            break;
     }
-    if (direction < 0)
-    {
-      intensity = max(intensity + direction, 1);
-    }
-    if (direction > 0 && intensity == 255)
-    {
-      direction = -1;
-      btn_press = 0;
-      btn_release = 0;
-      btn_state = RELEASED;
-    }
-    if (direction < 0 && intensity == 1)
-    {
-      direction = 1;
-      btn_press = 0;
-      btn_release = 0;
-      btn_state = RELEASED;
-    }
-    sei();
-    delay(10);
-  }
-  if (btn_press && btn_release && (btn_release - btn_press) < 500 && state != ON_HOLDING)
-  {
-    cli();
-    btn_press = 0;
-    btn_release = 0;
-    state = OFF;
-    digitalWrite(PWM_PIN, LOW);
-    digitalWrite(DCDC_EN_PIN, LOW);
-    sei();
-    power_down();
-  }
-  if (btn_press && btn_release && (state == ON_HOLDING || state == ON))
-  {
-    cli();
-    btn_press = 0;
-    btn_release = 0;
-    state = ON;
-    sei();
-    idle();
-  }
 }
 
 void loop()
 {
-  handle_button_state();
+  touch_control::handle();
+  brightness_control::handle();
+  handleEvent(event::currentEvent);
 }
 
 ISR(PCINT0_vect)
 {
   if (digitalRead(TRIGGER_PIN) == HIGH)
   {
-    btn_press = millis();
-    btn_release = 0;
-    btn_state = PRESSED;
+    touch_control::btn_press = millis();
+    touch_control::btn_release = 0;
+    event::currentEvent = event::BTN_PRESS;
   }
   else
   {
-    if (btn_press)
+    if (touch_control::btn_press)
     {
-      btn_release = millis();
-      btn_state = RELEASED;
+      touch_control::btn_release = millis();
+      event::currentEvent = event::BTN_RELEASE;
     }
   }
 }
@@ -180,7 +135,7 @@ ISR(PCINT0_vect)
 ISR(TIMER1_COMPA_vect)
 {
   static uint8_t softcount = 0xFF;
-  if (state == OFF)
+  if (fsm::currentState == fsm::OFF)
   {
     return;
   }
@@ -189,7 +144,7 @@ ISR(TIMER1_COMPA_vect)
   {
     digitalWrite(PWM_PIN, HIGH);
   }
-  if (softcount == intensity)
+  if (softcount == brightness_control::intensity)
   {
     digitalWrite(PWM_PIN, LOW);
   }
