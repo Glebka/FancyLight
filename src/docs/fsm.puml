@@ -1,0 +1,53 @@
+@startuml
+
+' class FsmHandler {
+'     -- public --
+'     + void turnOn()
+'     + void turnOff()
+'     + void setCpuIdle()
+'     + void goToSleep()
+'     + void startAdjustBrightness()
+'     + void stopAdjustBrightness()
+'     + void switchAdjustmentDirection()
+'     + void startMeasureIllumination()
+'     + void stopMeasureIllumination()
+'     + void getIlluminationState()
+'     + void startRFListening()
+'     + void stopRFListening()
+' }
+
+' enum FsmEvents {
+'     BTN_PRESS,
+'     BTN_RELEASE,
+'     BTN_LONG_PRESS,
+'     MAINS_ON,
+'     MAINS_OFF,
+'     LOW_ILLUMINATION,
+'     HIGH_ILLUMINATION,
+'     WDT_INTERRUPT,
+'     RF_PACKET_RECEIVED,
+'     RF_TIMEOUT,
+'     BRIGHTNESS_LIMIT_REACHED
+' }
+
+[*] --> Off
+Off: <enter> turnOff()
+Off --> PreOn1 : BTN_PRESS
+PreOn1: <enter> turnOn()
+PreOn1 --> BrightnessAdjustment : BTN_LONG_PRESS
+PreOn1 --> On : BTN_RELEASE [< 500 ms]
+BrightnessAdjustment: <enter> startAdjustBrightness()
+BrightnessAdjustment: <exit> stopAdjustBrightness()
+BrightnessAdjustment --> On : BTN_RELEASE
+BrightnessAdjustment --> BrightnessLimit : BRIGHTNESS_LIMIT_REACHED
+BrightnessLimit: <enter> switchAdjustmentDirection()
+BrightnessLimit --> On : BTN_RELEASE
+On --> PreOff1 : BTN_PRESS
+PreOff1 --> Off : BTN_RELEASE [< 500 ms]
+PreOff1 --> BrightnessAdjustment: BTN_LONG_PRESS
+Off --> PreOn2 : MAINS_OFF [LOW_ILLUMINATION]
+PreOn2: <enter> turnOn()
+PreOn2 --> On
+On --> Off : HIGH_ILLUMINATION [enabled]
+
+@enduml
