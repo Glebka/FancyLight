@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "power_control.hpp"
 #include "illumination_control.hpp"
 #include "touch_control.hpp"
@@ -18,6 +19,7 @@ namespace fsm
             if (event == event::BTN_PRESS)
             {
                 power_control::turnLightOn();
+                illumination_control::reset();
                 fsm::currentState = fsm::PRE_ON1;
             }
             else if (event == event::MAINS_OFF && config::hasFeature(config::MAINS_OUTAGE_DETECTION_USB))
@@ -29,6 +31,8 @@ namespace fsm
             {
                 power_control::turnLightOn();
                 fsm::currentState = fsm::ON;
+                delay(10);
+                illumination_control::update_high_illumination_threshold();
             }
             break;
 

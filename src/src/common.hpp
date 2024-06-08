@@ -12,7 +12,7 @@
 #define MODE1_PIN 4
 #define MODE2_PIN 0
 #define LOW_ILLUMINATION_THRESHOLD 15
-#define HYSTERESIS 50
+#define HYSTERESIS 160
 
 namespace event {
     // Define events

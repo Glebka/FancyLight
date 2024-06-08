@@ -40,7 +40,7 @@ namespace illumination_control
 {
 
     uint16_t adc_value = 0;
-    uint16_t high_illumination_threshold = 800;
+    uint16_t high_illumination_threshold = 1000;
     event::Event last_event = event::NUM_EVENTS;
     unsigned long last_measurement_time = 0;
 
@@ -59,6 +59,20 @@ namespace illumination_control
             digitalWrite(ADC_PIN, HIGH);
             wdt_disable();
         }
+    }
+
+    void update_high_illumination_threshold()
+    {
+        adc_enable();
+        high_illumination_threshold = min(800, analogRead(ADC_ANALOG_PIN) + HYSTERESIS);
+        adc_disable();
+    }
+
+    void reset()
+    {
+        last_measurement_time = 0;
+        last_event = event::NUM_EVENTS;
+        high_illumination_threshold = 800;
     }
 
     void handle()

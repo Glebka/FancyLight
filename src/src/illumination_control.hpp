@@ -12,4 +12,6 @@ namespace illumination_control {
 
     void init();
     void handle();
+    void update_high_illumination_threshold();
+    void reset();
 }
