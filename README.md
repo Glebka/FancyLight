@@ -7,20 +7,12 @@ A touch switch controller is assembled on a separate PCB to improve touch sensin
 ## TODO
 
 * Fix schematic and PCB:
-    * Remap MCU pins to use benefits of builtin PWM generator
-    * Fix auto-on on charging issue: add LDO for sensor and MCU, decoupling capacitors
-    * Replace MURATA coil with some more common analog
-    * Rework ISP connector so it compatible with programming clip, place it near the edge
-    * Make 4 layers stackup
-    * Update BOM and placement files to automatically mount
-        * USB-C connector
-        * LEDs
-        * Inductor for Step-Up converter
-    * Replace resistor on SENSE pin to 10k - 100k
-    * Design mounting hole for PCB itself
+    * Connect Q1's (SENSE) gate to GND via resistor
 * Fix enclosure
     * Design mounting for the PCB for easier assembly
     * Fix the depth of mode selection pocket
+* Fix firmware
+    * Adjust pin mappings
 * (Minor) Update schematic and PCB
     * Introduce nRF module for BLE
     * Add wireless charger receiver as an alternative to USB-C
