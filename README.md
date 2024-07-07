@@ -11,6 +11,7 @@ A touch switch controller is assembled on a separate PCB to improve touch sensin
 * Fix enclosure
     * Design mounting for the PCB for easier assembly
     * Fix the depth of mode selection pocket
+    * Adjust heights because of PCB thickness increase
 * Fix firmware
     * Adjust pin mappings
 * (Minor) Update schematic and PCB
