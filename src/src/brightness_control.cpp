@@ -30,6 +30,7 @@ namespace brightness_control
             {
                 event::currentEvent = event::BRIGHTNESS_LIMIT_REACHED;
             }
+            analogWrite(PWM_PIN, intensity);
             sei();
             delay(10);
         }

@@ -47,23 +47,3 @@ void loop()
   illumination_control::handle();
   fsm::handleEvent(event::currentEvent);
 }
-
-// TODO: get rid of this by fixing schematic and using hardware PWM
-ISR(TIMER1_COMPA_vect)
-{
-  static uint8_t softcount = 0xFF;
-  if (fsm::currentState == fsm::OFF)
-  {
-    return;
-  }
-  softcount++;
-  if (softcount == 0)
-  {
-    digitalWrite(PWM_PIN, HIGH);
-  }
-  if (softcount == brightness_control::intensity)
-  {
-    digitalWrite(PWM_PIN, LOW);
-  }
-  TCNT1 = 0;
-}

@@ -1,12 +1,13 @@
 #pragma once
 
+// ATtiny44A
 // counter-clockwise pinout
 #define LED_PIN 6
 #define SENSE_PIN 1
 #define DCDC_EN_PIN 10
-#define PWM_PIN 8
+#define PWM_PIN 2
 #define TRIGGER_PIN 9
-#define PHOTOR_SINK_PIN 2
+#define PHOTOR_SINK_PIN 8
 #define ADC_PIN 7
 #define ADC_ANALOG_PIN A3
 #define MODE1_PIN 4
@@ -14,7 +15,8 @@
 #define LOW_ILLUMINATION_THRESHOLD 15
 #define HYSTERESIS 160
 
-namespace event {
+namespace event
+{
     // Define events
     typedef enum
     {
