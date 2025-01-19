@@ -54,6 +54,7 @@ namespace fsm
             if (event == event::BTN_RELEASE)
             {
                 brightness_control::stopAdjust();
+                brightness_control::switchAdjustmentDirection();
                 fsm::currentState = fsm::ON;
             }
             else if (event == event::BRIGHTNESS_LIMIT_REACHED)

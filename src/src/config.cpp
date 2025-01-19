@@ -39,15 +39,14 @@ namespace config {
         digitalWrite(MODE1_PIN, LOW);
         digitalWrite(MODE2_PIN, LOW);
 
-        if (mode1) {
-            feature_set |= ILLUMINATION_DETECTION;
-        }
-        if (mode2) {
-            feature_set |= ILLUMINATION_DETECTION | MAINS_OUTAGE_DETECTION_USB;
-        }
         if (mode1 && mode2) {
-            feature_set |= BT_REMOTE_CONTROL;
+            feature_set = BT_REMOTE_CONTROL;
+        } else if (mode1) {
+            feature_set = ILLUMINATION_DETECTION;
+        } else {
+            feature_set = MAINS_OUTAGE_DETECTION_USB;
         }
+        
         if (feature_set != last_feature_set) {
             // re-init modules
             illumination_control::init();
